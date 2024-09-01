@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const multer = require('multer');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const app = express();
@@ -19,54 +18,14 @@ app.use(session({
 mongoose.connect('mongodb://localhost/jobportal', { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Schemas
-const JobSchema = new mongoose.Schema({
-    title: String,
-    company: String,
-    location: String,
-    description: String,
-});
-
 const UserSchema = new mongoose.Schema({
     email: String,
     password: String,
 });
 
-const Job = mongoose.model('Job', JobSchema);
 const User = mongoose.model('User', UserSchema);
 
 // Routes
-app.get('/api/featured-jobs', async (req, res) => {
-    const jobs = await Job.find().limit(5); // Example limit
-    res.json(jobs);
-});
-
-app.get('/api/jobs', async (req, res) => {
-    const jobs = await Job.find();
-    res.json(jobs);
-});
-
-app.get('/api/job/:id', async (req, res) => {
-    const job = await Job.findById(req.params.id);
-    if (job) {
-        res.json(job);
-    } else {
-        res.status(404).send('Job not found');
-    }
-});
-
-app.post('/api/apply', multer().single('resume'), (req, res) => {
-    // Handle application form submission
-    res.json({ message: 'Application received' });
-});
-
-app.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
-    await newUser.save();
-    res.redirect('/login.html');
-});
-
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
